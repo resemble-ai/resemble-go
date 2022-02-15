@@ -1,6 +1,7 @@
 package resemble
 
 import (
+	"resemble/v2/api"
 	"resemble/v2/repo"
 	"resemble/v2/service"
 )
@@ -10,7 +11,7 @@ func NewClient(token string) *Client {
 	return &Client{
 		Project: service.NewProject(),
 		Voice:   service.NewVoice(),
-		Clip:    service.NewClip(),
+		Clip:    service.NewClip(api.NewClient(token)),
 	}
 }
 
