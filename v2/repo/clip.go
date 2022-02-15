@@ -1,8 +1,8 @@
 package repo
 
 import (
-	"resemble/request"
-	"resemble/response"
+	"resemble/v2/request"
+	"resemble/v2/response"
 )
 
 // Clip represent clip method interface collections

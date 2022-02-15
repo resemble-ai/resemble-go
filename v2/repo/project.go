@@ -1,8 +1,8 @@
 package repo
 
 import (
-	"resemble/request"
-	"resemble/response"
+	"resemble/v2/request"
+	"resemble/v2/response"
 )
 
 // Project represent project interface method collections

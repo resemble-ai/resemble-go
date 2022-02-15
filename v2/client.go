@@ -1,12 +1,12 @@
 package resemble
 
 import (
-	"resemble/repo"
-	"resemble/service"
+	"resemble/v2/repo"
+	"resemble/v2/service"
 )
 
 // NewClient returns a new instance resemble client
-func NewClient(version, token string) *Client {
+func NewClient(token string) *Client {
 	return &Client{
 		Project: service.NewProject(),
 		Voice:   service.NewVoice(),

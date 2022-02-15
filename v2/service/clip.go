@@ -1,9 +1,9 @@
 package service
 
 import (
-	"resemble/repo"
-	"resemble/request"
-	"resemble/response"
+	"resemble/v2/repo"
+	"resemble/v2/request"
+	"resemble/v2/response"
 )
 
 // NewClip returns a new instance of repo.Client
