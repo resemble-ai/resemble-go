@@ -8,12 +8,13 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"resemble/v2/api"
-	"resemble/v2/option"
-	"resemble/v2/repo"
-	"resemble/v2/request"
-	"resemble/v2/response"
-	"resemble/v2/util"
+
+	"github.com/ashadi-cc/resemble/v2/api"
+	"github.com/ashadi-cc/resemble/v2/option"
+	"github.com/ashadi-cc/resemble/v2/repo"
+	"github.com/ashadi-cc/resemble/v2/request"
+	"github.com/ashadi-cc/resemble/v2/response"
+	"github.com/ashadi-cc/resemble/v2/util"
 
 	"github.com/pkg/errors"
 )

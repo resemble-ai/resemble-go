@@ -1,9 +1,9 @@
 package service
 
 import (
-	"resemble/v2/repo"
-	"resemble/v2/request"
-	"resemble/v2/response"
+	"github.com/ashadi-cc/resemble/v2/repo"
+	"github.com/ashadi-cc/resemble/v2/request"
+	"github.com/ashadi-cc/resemble/v2/response"
 )
 
 // NewProject returns a new instance of repo.Project

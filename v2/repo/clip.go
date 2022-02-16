@@ -1,9 +1,9 @@
 package repo
 
 import (
-	"resemble/v2/option"
-	"resemble/v2/request"
-	"resemble/v2/response"
+	"github.com/ashadi-cc/resemble/v2/option"
+	"github.com/ashadi-cc/resemble/v2/request"
+	"github.com/ashadi-cc/resemble/v2/response"
 )
 
 // Clip represent clip method interface collections

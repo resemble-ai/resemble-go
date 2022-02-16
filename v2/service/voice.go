@@ -1,6 +1,6 @@
 package service
 
-import "resemble/v2/repo"
+import "github.com/ashadi-cc/resemble/v2/repo"
 
 // NewVoice returns a new instance of repo.Voice
 func NewVoice() repo.Voice {

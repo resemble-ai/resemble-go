@@ -1,8 +1,8 @@
 package repo
 
 import (
-	"resemble/v2/request"
-	"resemble/v2/response"
+	"github.com/ashadi-cc/resemble/v2/request"
+	"github.com/ashadi-cc/resemble/v2/response"
 )
 
 // Project represent project interface method collections
