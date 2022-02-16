@@ -1,19 +1,118 @@
 package service
 
 import (
+	"bufio"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"resemble/v2/api"
+	"resemble/v2/option"
 	"resemble/v2/repo"
 	"resemble/v2/request"
 	"resemble/v2/response"
+	"resemble/v2/util"
+
+	"github.com/pkg/errors"
 )
 
 // NewClip returns a new instance of repo.Client
-func NewClip() repo.Clip {
-	return &clip{}
+func NewClip(clientApi api.Operation) repo.Clip {
+	return &clip{
+		clientApi: clientApi,
+	}
 }
 
-type clip struct{}
+type clip struct {
+	clientApi api.Operation
+}
+
+//// All implements repo.Clip.All method
+func (c clip) All(projectUuid string, page, pageSize int) (response.Clips, error) {
+	var clips response.Clips
+
+	path := fmt.Sprintf("projects/%s/clips?page=%d&page_size=%d", projectUuid, page, pageSize)
+	resp, err := c.clientApi.Get(context.Background(), path)
+	if err != nil {
+		return clips, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return clips, errors.Wrap(err, "unable to read body")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return clips, fmt.Errorf("%s", string(body))
+	}
+
+	if err := json.Unmarshal(body, &clips); err != nil {
+		return clips, err
+	}
+
+	return clips, nil
+}
 
 // Stream implements repo.Clip.Stream method
-func (c clip) Stream(syncServerUrl string, data request.Payload) (chan response.ClipStream, error) {
-	return nil, nil
+func (c clip) Stream(syncServerUrl string, data request.Payload, options ...option.ClipStream) (chan response.ClipStream, error) {
+	resp, err := c.clientApi.Stream(context.Background(), syncServerUrl, data)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to read body")
+		}
+		return nil, fmt.Errorf("%s", string(body))
+	}
+
+	opt := option.ClipStream{}
+	if options != nil {
+		opt = options[0]
+	}
+	opt.Parse()
+
+	decoder, err := util.NewStreamDecoder(opt.BufferSize, !opt.WithWavHeader)
+	if err != nil {
+		return nil, err
+	}
+
+	reader := bufio.NewReaderSize(resp.Body, opt.ChunkSize)
+	clipStream := make(chan response.ClipStream)
+
+	go c.decodeChunk(reader, decoder, clipStream)
+
+	return clipStream, nil
+}
+
+func (c clip) decodeChunk(reader *bufio.Reader, decoder *util.StreamDecoder, clipStream chan response.ClipStream) {
+	defer close(clipStream)
+
+	for {
+		chunk, err := reader.ReadBytes('\n')
+		if err != nil {
+			if err != io.EOF {
+				clipStream <- response.ClipStream{Chunk: nil, Err: err}
+			}
+			break
+		}
+
+		decoder.DecodeChunk(chunk)
+		if buffer := decoder.FlushBuffer(false); buffer != nil {
+			clipStream <- response.ClipStream{Chunk: buffer}
+		}
+
+	}
+
+	for {
+		if buffer := decoder.FlushBuffer(false); buffer != nil {
+			clipStream <- response.ClipStream{Chunk: buffer}
+		} else {
+			return
+		}
+	}
 }

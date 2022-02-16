@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"resemble/v2/option"
 	"resemble/v2/request"
 	"resemble/v2/response"
 )
@@ -11,5 +12,5 @@ type Clip interface {
 	All(projectUuid string, page, pageSize int) (response.Clips, error)
 
 	// Stream returns stream a clip by given syncServerUrl and payload
-	Stream(syncServerUrl string, data request.Payload) (chan response.ClipStream, error)
+	Stream(syncServerUrl string, data request.Payload, options ...option.ClipStream) (chan response.ClipStream, error)
 }
