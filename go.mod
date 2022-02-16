@@ -1,4 +1,4 @@
-module resemble
+module github.com/ashadi-cc/resemble
 
 go 1.16
 
