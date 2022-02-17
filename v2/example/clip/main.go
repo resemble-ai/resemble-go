@@ -4,16 +4,17 @@ import (
 	"fmt"
 
 	"github.com/ashadi-cc/resemble/v2"
+	"github.com/ashadi-cc/resemble/v2/example"
 	"github.com/ashadi-cc/resemble/v2/request"
 )
 
 func main() {
-	client := resemble.NewClient("<your_api_token>")
+	client := resemble.NewClient(example.LoadConfigByKey("api_key"))
 
-	voiceUUID := "<your_voice_id>"
-	projectUUID := "<your_project_uuid>"
-	body := "Data is ready."
-	streamUrl := "<your_sync_server_url>"
+	voiceUUID := example.LoadConfigByKey("voice_uuid")
+	projectUUID := example.LoadConfigByKey("project_uuid")
+	body := "This is a streaming test."
+	streamUrl := example.LoadConfigByKey("stream_url")
 
 	fmt.Println("Example streaming clip")
 	clipStream, err := client.Clip.Stream(streamUrl, request.Payload{
