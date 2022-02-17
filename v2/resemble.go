@@ -8,10 +8,11 @@ import (
 
 // NewClient returns a new instance resemble client
 func NewClient(token string) *Client {
+	apiClient := api.NewClient(token)
 	return &Client{
-		Project: service.NewProject(),
-		Voice:   service.NewVoice(),
-		Clip:    service.NewClip(api.NewClient(token)),
+		Project: service.NewProject(apiClient),
+		Voice:   service.NewVoice(apiClient),
+		Clip:    service.NewClip(apiClient),
 	}
 }
 

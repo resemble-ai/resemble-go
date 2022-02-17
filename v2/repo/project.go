@@ -8,7 +8,7 @@ import (
 // Project represent project interface method collections
 type Project interface {
 	// All returns all project by given page and pagesize
-	All(page, pageSize int) (response.Projects, error)
+	All(page int, pageSize ...int) (response.Projects, error)
 
 	// Create create new project by given data payload
 	Create(data request.Payload) (response.Project, error)

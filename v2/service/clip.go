@@ -31,11 +31,17 @@ type clip struct {
 }
 
 //// All implements repo.Clip.All method
-func (c clip) All(projectUuid string, page, pageSize int) (response.Clips, error) {
+func (c clip) All(projectUuid string, page int, pageSize ...int) (response.Clips, error) {
 	var clips response.Clips
 
-	path := fmt.Sprintf("projects/%s/clips?page=%d&page_size=%d", projectUuid, page, pageSize)
-	resp, err := c.clientApi.Get(context.Background(), path)
+	q := map[string]interface{}{}
+	q["page"] = page
+	if len(pageSize) > 0 {
+		q["page_size"] = pageSize[0]
+	}
+
+	path := fmt.Sprintf("projects/%s/clips", projectUuid)
+	resp, err := c.clientApi.Get(context.Background(), path, q)
 	if err != nil {
 		return clips, err
 	}
