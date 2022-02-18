@@ -43,3 +43,13 @@ func TestFlushBufferWithoutHeader(t *testing.T) {
 
 	assert.Equal(t, (len(data) - streamingWavHeaderBufferLength), len(result))
 }
+
+func TestFlushBufferWithForce(t *testing.T) {
+	decoder, err := NewStreamDecoder(2, false)
+	assert.NoError(t, err)
+	data := []byte("test data byte test data")
+	decoder.DecodeChunk(data)
+
+	b := decoder.FlushBuffer(true)
+	assert.Equal(t, data, b)
+}
