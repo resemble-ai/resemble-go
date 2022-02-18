@@ -14,6 +14,9 @@ type Operation interface {
 	// Post send Post Request by given payload
 	Post(ctx context.Context, path string, data interface{}, query ...map[string]interface{}) (*http.Response, error)
 
+	// PostForm send Post request with multipart from body
+	PostForm(ctx context.Context, path string, data map[string]string, query ...map[string]interface{}) (*http.Response, error)
+
 	// Put send Put request by given payload
 	Put(ctx context.Context, path string, data interface{}, query ...map[string]interface{}) (*http.Response, error)
 
@@ -50,6 +53,15 @@ func (c *client) Post(ctx context.Context, path string, data interface{}, query 
 		return nil, err
 	}
 	return requestJson(ctx, uri, http.MethodPost, buildHeaders(c.token, false), data)
+}
+
+// PostForm implements Operation.PostForm
+func (c *client) PostForm(ctx context.Context, path string, data map[string]string, query ...map[string]interface{}) (*http.Response, error) {
+	uri, err := formatUrl(c.baseUrl, path, query...)
+	if err != nil {
+		return nil, err
+	}
+	return requestMultiPart(ctx, uri, http.MethodPost, buildHeaders(c.token, false), data)
 }
 
 // Put implements Operation.Put method
