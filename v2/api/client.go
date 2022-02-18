@@ -111,7 +111,6 @@ func formatUrl(baseUri, path string, query ...map[string]interface{}) (string, e
 		}
 	}
 	u.RawQuery = q.Encode()
-
 	return u.String(), nil
 }
 
