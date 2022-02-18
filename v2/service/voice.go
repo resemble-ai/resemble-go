@@ -156,7 +156,7 @@ func (v voice) Delete(uuid string) (response.Message, error) {
 
 // Build implements repo.Voice.Build method
 func (v voice) Build(uuid string) (response.Message, error) {
-	path := fmt.Sprintf("voices/%s", uuid)
+	path := fmt.Sprintf("voices/%s/build", uuid)
 	var message response.Message
 	resp, err := v.clientApi.Post(context.Background(), path, nil)
 	if err != nil {
