@@ -11,6 +11,7 @@ import (
 	"github.com/ashadi-cc/resemble/v2/repo"
 	"github.com/ashadi-cc/resemble/v2/request"
 	"github.com/ashadi-cc/resemble/v2/response"
+	"github.com/ashadi-cc/resemble/v2/util"
 	"github.com/pkg/errors"
 )
 
@@ -45,7 +46,7 @@ func (v voice) All(page int, pageSize ...int) (response.Voices, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return voices, fmt.Errorf("%s", string(body))
+		return voices, util.NewApiError(body, "voices", resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &voices); err != nil {
@@ -69,7 +70,7 @@ func (v voice) Create(data request.Payload) (response.Voice, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return voice, fmt.Errorf("%s", string(body))
+		return voice, util.NewApiError(body, "voices", resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &voice); err != nil {
@@ -94,7 +95,7 @@ func (v voice) Get(uuid string) (response.Voice, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return voice, fmt.Errorf("%s", string(body))
+		return voice, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &voice); err != nil {
@@ -119,7 +120,7 @@ func (v voice) Update(uuid string, data request.Payload) (response.Voice, error)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return voice, fmt.Errorf("%s", string(body))
+		return voice, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &voice); err != nil {
@@ -144,7 +145,7 @@ func (v voice) Delete(uuid string) (response.Message, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return message, fmt.Errorf("%s", string(body))
+		return message, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &message); err != nil {
@@ -169,7 +170,7 @@ func (v voice) Build(uuid string) (response.Message, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return message, fmt.Errorf("%s", string(body))
+		return message, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &message); err != nil {

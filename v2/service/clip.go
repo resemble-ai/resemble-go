@@ -54,7 +54,7 @@ func (c clip) All(projectUuid string, page int, pageSize ...int) (response.Clips
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return clips, fmt.Errorf("%s", string(body))
+		return clips, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &clips); err != nil {
@@ -92,7 +92,7 @@ func (c clip) Get(projectUuid, uuid string) (response.Clip, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return clip, fmt.Errorf("%s", string(body))
+		return clip, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &clip); err != nil {
@@ -119,7 +119,7 @@ func (c clip) UpdateAsync(projectUuid, uuid, callbackUrl string, data request.Pa
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return clip, fmt.Errorf("%s", string(body))
+		return clip, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &clip); err != nil {
@@ -144,7 +144,7 @@ func (c clip) Delete(projectUuid, uuid string) (response.Message, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return message, fmt.Errorf("%s", string(body))
+		return message, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &message); err != nil {
@@ -166,7 +166,7 @@ func (c clip) Stream(data request.Payload, options ...option.ClipStream) (chan r
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to read body")
 		}
-		return nil, fmt.Errorf("%s", string(body))
+		return nil, util.NewApiError(body, c.app.GetSyncServerUrl(), resp.StatusCode, resp.Request.Method)
 	}
 
 	opt := option.ClipStream{}
@@ -231,7 +231,7 @@ func (c clip) create(projectUuid string, data request.Payload) (response.Clip, e
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return clip, fmt.Errorf("%s", string(body))
+		return clip, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &clip); err != nil {

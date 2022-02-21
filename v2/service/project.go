@@ -11,6 +11,7 @@ import (
 	"github.com/ashadi-cc/resemble/v2/repo"
 	"github.com/ashadi-cc/resemble/v2/request"
 	"github.com/ashadi-cc/resemble/v2/response"
+	"github.com/ashadi-cc/resemble/v2/util"
 	"github.com/pkg/errors"
 )
 
@@ -45,7 +46,7 @@ func (p project) All(page int, pageSize ...int) (response.Projects, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return projects, fmt.Errorf("%s", string(body))
+		return projects, util.NewApiError(body, "projects", resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &projects); err != nil {
@@ -69,7 +70,7 @@ func (p project) Create(data request.Payload) (response.Project, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return project, fmt.Errorf("%s", string(body))
+		return project, util.NewApiError(body, "projects", resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &project); err != nil {
@@ -94,7 +95,7 @@ func (p project) Get(uuid string) (response.Project, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return project, fmt.Errorf("%s", string(body))
+		return project, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &project); err != nil {
@@ -119,7 +120,7 @@ func (p project) Update(uuid string, data request.Payload) (response.Project, er
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return project, fmt.Errorf("%s", string(body))
+		return project, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &project); err != nil {
@@ -144,7 +145,7 @@ func (p project) Delete(uuid string) (response.Message, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return message, fmt.Errorf("%s", string(body))
+		return message, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &message); err != nil {

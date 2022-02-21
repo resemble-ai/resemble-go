@@ -11,6 +11,7 @@ import (
 	"github.com/ashadi-cc/resemble/v2/repo"
 	"github.com/ashadi-cc/resemble/v2/request"
 	"github.com/ashadi-cc/resemble/v2/response"
+	"github.com/ashadi-cc/resemble/v2/util"
 	"github.com/pkg/errors"
 )
 
@@ -46,7 +47,7 @@ func (r recording) All(uuid string, page int, pageSize ...int) (response.Recordi
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return recordings, fmt.Errorf("%s", string(body))
+		return recordings, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &recordings); err != nil {
@@ -78,7 +79,7 @@ func (r recording) Create(voiceuuid string, filePath string, data request.Payloa
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return recording, fmt.Errorf("%s", string(body))
+		return recording, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &recording); err != nil {
@@ -103,7 +104,7 @@ func (r recording) Get(voiceuuid, uuid string) (response.Recording, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return recording, fmt.Errorf("%s", string(body))
+		return recording, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &recording); err != nil {
@@ -128,7 +129,7 @@ func (r recording) Update(voiceuuid, uuid string, data request.Payload) (respons
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return recording, fmt.Errorf("%s", string(body))
+		return recording, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &recording); err != nil {
@@ -154,7 +155,7 @@ func (r recording) Delete(voiceuuid, uuid string) (response.Message, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return message, fmt.Errorf("%s", string(body))
+		return message, util.NewApiError(body, path, resp.StatusCode, resp.Request.Method)
 	}
 
 	if err := json.Unmarshal(body, &message); err != nil {
