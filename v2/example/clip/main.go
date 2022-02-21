@@ -11,6 +11,9 @@ import (
 
 func main() {
 	client := resemble.NewClient(example.LoadConfigByKey("TEST_API_KEY"))
+	client.SetSyncServerUrl(example.LoadConfigByKey("TEST_STREAM_URL"))
+
+	// get values from environment variable
 	voiceUUID := example.LoadConfigByKey("TEST_VOICE_UUID")
 	projectUUID := example.LoadConfigByKey("TEST_PROJECT_UUID")
 	callbackUrl := example.LoadConfigByKey("TEST_CALLBACK_URL")
@@ -71,8 +74,7 @@ func main() {
 	// stream clip
 	time.Sleep(time.Second)
 	body := "This is a streaming test."
-	streamUrl := example.LoadConfigByKey("TEST_STREAM_URL")
-	clipStream, err := client.Clip.Stream(streamUrl, request.Payload{
+	clipStream, err := client.Clip.Stream(request.Payload{
 		"voice_uuid":   voiceUUID,
 		"project_uuid": projectUUID,
 		"data":         body,

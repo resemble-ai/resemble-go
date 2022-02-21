@@ -20,14 +20,16 @@ import (
 )
 
 // NewClip returns a new instance of repo.Client
-func NewClip(clientApi api.Operation) repo.Clip {
+func NewClip(app repo.App, clientApi api.Operation) repo.Clip {
 	return &clip{
+		app:       app,
 		clientApi: clientApi,
 	}
 }
 
 type clip struct {
 	clientApi api.Operation
+	app       repo.App
 }
 
 //// All implements repo.Clip.All method
@@ -153,8 +155,8 @@ func (c clip) Delete(projectUuid, uuid string) (response.Message, error) {
 }
 
 // Stream implements repo.Clip.Stream method
-func (c clip) Stream(syncServerUrl string, data request.Payload, options ...option.ClipStream) (chan response.ClipStream, error) {
-	resp, err := c.clientApi.Stream(context.Background(), syncServerUrl, data)
+func (c clip) Stream(data request.Payload, options ...option.ClipStream) (chan response.ClipStream, error) {
+	resp, err := c.clientApi.Stream(context.Background(), c.app.GetSyncServerUrl(), data)
 	if err != nil {
 		return nil, err
 	}

@@ -26,6 +26,6 @@ type Clip interface {
 	// Delete delete clip by given projectuuid, clipuuid
 	Delete(projectUuid, uuid string) (response.Message, error)
 
-	// Stream returns stream a clip by given syncServerUrl and payload
-	Stream(syncServerUrl string, data request.Payload, options ...option.ClipStream) (chan response.ClipStream, error)
+	// Stream returns stream a clip by given payload request
+	Stream(data request.Payload, options ...option.ClipStream) (chan response.ClipStream, error)
 }
