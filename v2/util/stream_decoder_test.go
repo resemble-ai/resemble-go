@@ -33,7 +33,7 @@ func TestFlushBufferWithoutHeader(t *testing.T) {
 
 	result := []byte{}
 	for {
-		if b := decoder.FlushBuffer(false); b != nil {
+		if b := decoder.FlushBuffer(false, true); b != nil {
 			assert.LessOrEqual(t, len(b), 4)
 			result = append(result, b...)
 		} else {

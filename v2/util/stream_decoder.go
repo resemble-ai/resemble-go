@@ -41,7 +41,7 @@ func (s *StreamDecoder) DecodeChunk(chunk []byte) {
 }
 
 // FlushBuffer returns chunk data
-func (s *StreamDecoder) FlushBuffer(force bool) []byte {
+func (s *StreamDecoder) FlushBuffer(force bool, drain ...bool) []byte {
 	if force {
 		defer s.Reset()
 		return s.buffer
@@ -52,9 +52,13 @@ func (s *StreamDecoder) FlushBuffer(force bool) []byte {
 		s.buffer = s.buffer[s.bufferSize:]
 		return buff
 	} else {
-		defer s.Reset()
-		return s.buffer
+		if len(drain) > 0 && drain[0] {
+			defer s.Reset()
+			return s.buffer
+		}
 	}
+
+	return nil
 }
 
 // Reset reset the buffer variable
@@ -64,5 +68,9 @@ func (s *StreamDecoder) Reset() {
 
 // Header returns wav header value
 func (s *StreamDecoder) Header() []byte {
-	return s.headerBuffer
+	if s.ignoreWavHeader {
+		return s.headerBuffer
+	}
+
+	return s.buffer[:streamingWavHeaderBufferLength]
 }

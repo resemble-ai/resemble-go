@@ -208,7 +208,7 @@ func (c clip) decodeChunk(reader *bufio.Reader, decoder *util.StreamDecoder, cli
 	}
 
 	for {
-		if buffer := decoder.FlushBuffer(false); buffer != nil {
+		if buffer := decoder.FlushBuffer(false, true); buffer != nil {
 			clipStream <- response.ClipStream{Chunk: buffer}
 		} else {
 			return
