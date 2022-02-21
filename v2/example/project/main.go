@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	client := resemble.NewClient(example.LoadConfigByKey("api_key"))
+	client := resemble.NewClient(example.LoadConfigByKey("TEST_API_KEY"))
 
 	// create project
 	project, err := client.Project.Create(request.Payload{

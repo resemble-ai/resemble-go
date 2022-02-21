@@ -10,15 +10,17 @@ import (
 func NewClient(token string) *Client {
 	apiClient := api.NewClient(token)
 	return &Client{
-		Project: service.NewProject(apiClient),
-		Voice:   service.NewVoice(apiClient),
-		Clip:    service.NewClip(apiClient),
+		Project:   service.NewProject(apiClient),
+		Voice:     service.NewVoice(apiClient),
+		Clip:      service.NewClip(apiClient),
+		Recording: service.NewRecording(apiClient),
 	}
 }
 
 // Client represent resemble client
 type Client struct {
-	Project repo.Project
-	Voice   repo.Voice
-	Clip    repo.Clip
+	Project   repo.Project
+	Voice     repo.Voice
+	Clip      repo.Clip
+	Recording repo.Recording
 }
