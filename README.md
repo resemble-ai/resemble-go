@@ -26,16 +26,16 @@ func main() {
 	}
     fmt.Println(projects.items)
 
-	project, err := client.Project.Create(request.Payload{
-		"name":             "Project 1",
-		"description":      "project description",
-		"is_public":        false,
-		"is_collaborative": false,
-		"is_archived":      false,
-	})
-	if err != nil {
-		panic(err)
-	}
+    project, err := client.Project.Create(request.Payload{
+        "name":             "Project 1",
+        "description":      "project description",
+        "is_public":        false,
+        "is_collaborative": false,
+        "is_archived":      false,
+    })
+    if err != nil {
+        panic(err)
+    }
 }
 
 ```
