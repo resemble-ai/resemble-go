@@ -88,7 +88,17 @@ func main() {
 			log.Fatal(err)
 		// receive metadata
 		case meta := <-cMeta:
-			fmt.Println(meta)
+			fmt.Println(meta.RiffID)
+			fmt.Println(meta.FileSize)
+			fmt.Println(meta.RiffType)
+			fmt.Println(meta.FormatChunkID)
+			fmt.Println(meta.ChunkDataSize)
+			fmt.Println(meta.CompressionCode)
+			fmt.Println(meta.NumberOfChannels)
+			fmt.Println(meta.SampleRate)
+			fmt.Println(meta.ByteRate)
+			fmt.Println(meta.BlockAlign)
+			fmt.Println(meta.BitsPerSample)
 		// receive chunk
 		case chunk := <-cChunk:
 			_ = chunk
