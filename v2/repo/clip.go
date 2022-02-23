@@ -27,5 +27,5 @@ type Clip interface {
 	Delete(projectUuid, uuid string) (response.Message, error)
 
 	// Stream returns stream a clip by given payload request
-	Stream(data request.Payload, options ...option.ClipStream) (chan response.ClipStream, error)
+	Stream(data request.Payload, options ...option.ClipStream) (chan response.Metadata, chan []byte, chan bool, chan error)
 }

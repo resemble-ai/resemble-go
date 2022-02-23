@@ -69,8 +69,14 @@ func (s *StreamDecoder) Reset() {
 // Header returns wav header value
 func (s *StreamDecoder) Header() []byte {
 	if s.ignoreWavHeader {
-		return s.headerBuffer
+		if len(s.headerBuffer) == streamingWavHeaderBufferLength {
+			return s.headerBuffer
+		}
 	}
 
-	return s.buffer[:streamingWavHeaderBufferLength]
+	if len(s.buffer) >= streamingWavHeaderBufferLength {
+		return s.buffer[:streamingWavHeaderBufferLength]
+	}
+
+	return nil
 }

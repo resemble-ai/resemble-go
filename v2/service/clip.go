@@ -155,18 +155,22 @@ func (c clip) Delete(projectUuid, uuid string) (response.Message, error) {
 }
 
 // Stream implements repo.Clip.Stream method
-func (c clip) Stream(data request.Payload, options ...option.ClipStream) (chan response.ClipStream, error) {
+func (c clip) Stream(data request.Payload, options ...option.ClipStream) (chan response.Metadata, chan []byte, chan bool, chan error) {
+	cErr := make(chan error, 1)
 	resp, err := c.clientApi.Stream(context.Background(), c.app.GetSyncServerUrl(), data)
 	if err != nil {
-		return nil, err
+		cErr <- err
+		return nil, nil, nil, cErr
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to read body")
+			cErr <- errors.Wrap(err, "unable to read body")
+			return nil, nil, nil, cErr
 		}
-		return nil, util.NewApiError(body, c.app.GetSyncServerUrl(), resp.StatusCode, resp.Request.Method)
+		cErr <- util.NewApiError(body, c.app.GetSyncServerUrl(), resp.StatusCode, resp.Request.Method)
+		return nil, nil, nil, cErr
 	}
 
 	opt := option.ClipStream{}
@@ -177,40 +181,48 @@ func (c clip) Stream(data request.Payload, options ...option.ClipStream) (chan r
 
 	decoder, err := util.NewStreamDecoder(opt.BufferSize, !opt.WithWavHeader)
 	if err != nil {
-		return nil, err
+		cErr <- err
+		return nil, nil, nil, cErr
 	}
 
 	reader := bufio.NewReaderSize(resp.Body, opt.ChunkSize)
-	clipStream := make(chan response.ClipStream)
+	cMeta := make(chan response.Metadata, 1)
+	cChunk := make(chan []byte)
+	cDone := make(chan bool, 1)
+	go c.decodeChunk(reader, decoder, cChunk, cMeta, cDone, cErr)
 
-	go c.decodeChunk(reader, decoder, clipStream)
-
-	return clipStream, nil
+	return cMeta, cChunk, cDone, cErr
 }
 
-func (c clip) decodeChunk(reader *bufio.Reader, decoder *util.StreamDecoder, clipStream chan response.ClipStream) {
-	defer close(clipStream)
-
+func (c clip) decodeChunk(reader *bufio.Reader, decoder *util.StreamDecoder, cChunk chan []byte, cMeta chan response.Metadata, cDone chan bool, cErr chan error) {
+	isreadHeader := false
 	for {
 		chunk, err := reader.ReadBytes('\n')
 		if err != nil {
 			if err != io.EOF {
-				clipStream <- response.ClipStream{Chunk: nil, Err: err}
+				cErr <- err
 			}
 			break
 		}
 
 		decoder.DecodeChunk(chunk)
-		if buffer := decoder.FlushBuffer(false); buffer != nil {
-			clipStream <- response.ClipStream{Chunk: buffer}
+		if !isreadHeader {
+			if header := decoder.Header(); header != nil {
+				isreadHeader = true
+				cMeta <- response.NewMetaData(header)
+			}
 		}
 
+		if buffer := decoder.FlushBuffer(false); buffer != nil {
+			cChunk <- buffer
+		}
 	}
 
 	for {
 		if buffer := decoder.FlushBuffer(false, true); buffer != nil {
-			clipStream <- response.ClipStream{Chunk: buffer}
+			cChunk <- buffer
 		} else {
+			cDone <- true
 			return
 		}
 	}
