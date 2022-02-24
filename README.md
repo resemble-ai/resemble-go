@@ -13,8 +13,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ashadi-cc/resemble/v2"
-	"github.com/ashadi-cc/resemble/v2/request"
+	"github.com/resemble-ai/resemble-go/v2"
+	"github.com/resemble-ai/resemble-go/v2/request"
 )
 
 func main() {
@@ -39,6 +39,53 @@ func main() {
 }
 
 ```
+
+## Streaming
+The Streaming API is currently in beta and is not available to all users. Please reach out to team@resemble.ai to inquire more.
+
+Streaming example:
+```golang
+client := resemble.NewClient("your_api_key")
+client.SetSyncServerUrl("your_resemble_synthesis_server_url") # Extra configuration required for streaming
+
+cMeta, cChunk, cDone, cErr := client.Clip.Stream(request.Payload{
+    "voice_uuid":   "[voiceUUID]",
+    "project_uuid": "[projectUUID]",
+    "data":         "This is a streaming test.",
+})
+
+for {
+    select {
+    // receive error. print error then exit
+    case err := <-cErr:
+        log.Fatal(err)
+    // receive metadata
+    case meta := <-cMeta:
+        fmt.Println(meta.RiffID)
+        fmt.Println(meta.FileSize)
+        fmt.Println(meta.RiffType)
+        fmt.Println(meta.FormatChunkID)
+        fmt.Println(meta.ChunkDataSize)
+        fmt.Println(meta.CompressionCode)
+        fmt.Println(meta.NumberOfChannels)
+        fmt.Println(meta.SampleRate)
+        fmt.Println(meta.ByteRate)
+        fmt.Println(meta.BlockAlign)
+        fmt.Println(meta.BitsPerSample)
+    // receive chunk
+    case chunk := <-cChunk:
+        fmt.Println("chunk data")
+    // receive done signal. exit
+    case <-cDone:
+        return
+    }
+}
+
+
+```
+# Development
+
+The library files are located in `v2/`
 
 ## Example 
 All example usage can be found in v2/example directory. before run it, you need set the environment variables: 
