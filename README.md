@@ -84,10 +84,20 @@ for {
 
 ```
 # Development
-
 The library files are located in `v2/`
 
-## Example 
+# Testing 
+```bash
+$ cd v2/ 
+export TEST_API_KEY=your_api_key
+export TEST_VOICE_UUID=your_voice_uuid
+export TEST_PROJECT_UUID=your_project_uuid
+export TEST_STREAM_URL="https://your-stream-url"
+export TEST_CALLBACK_URL="https://webhook.site/"
+$ go test -v ./...
+```
+
+# Example 
 All example usage can be found in v2/example directory. before run it, you need set the environment variables: 
 
 ```bash
