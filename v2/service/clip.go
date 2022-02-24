@@ -9,12 +9,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/ashadi-cc/resemble/v2/api"
-	"github.com/ashadi-cc/resemble/v2/option"
-	"github.com/ashadi-cc/resemble/v2/repo"
-	"github.com/ashadi-cc/resemble/v2/request"
-	"github.com/ashadi-cc/resemble/v2/response"
-	"github.com/ashadi-cc/resemble/v2/util"
+	"github.com/resemble-ai/resemble-go/v2/api"
+	"github.com/resemble-ai/resemble-go/v2/option"
+	"github.com/resemble-ai/resemble-go/v2/repo"
+	"github.com/resemble-ai/resemble-go/v2/request"
+	"github.com/resemble-ai/resemble-go/v2/response"
+	"github.com/resemble-ai/resemble-go/v2/util"
 
 	"github.com/pkg/errors"
 )

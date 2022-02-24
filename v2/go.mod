@@ -1,4 +1,4 @@
-module github.com/ashadi-cc/resemble/v2
+module github.com/resemble-ai/resemble-go/v2
 
 go 1.16
 

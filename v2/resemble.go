@@ -1,9 +1,9 @@
 package resemble
 
 import (
-	"github.com/ashadi-cc/resemble/v2/api"
-	"github.com/ashadi-cc/resemble/v2/repo"
-	"github.com/ashadi-cc/resemble/v2/service"
+	"github.com/resemble-ai/resemble-go/v2/api"
+	"github.com/resemble-ai/resemble-go/v2/repo"
+	"github.com/resemble-ai/resemble-go/v2/service"
 )
 
 // NewClient returns a new instance resemble client

@@ -1,8 +1,8 @@
 package repo
 
 import (
-	"github.com/ashadi-cc/resemble/v2/request"
-	"github.com/ashadi-cc/resemble/v2/response"
+	"github.com/resemble-ai/resemble-go/v2/request"
+	"github.com/resemble-ai/resemble-go/v2/response"
 )
 
 // Recording represent recording interface method collections

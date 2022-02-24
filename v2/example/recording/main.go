@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/ashadi-cc/resemble/v2"
-	"github.com/ashadi-cc/resemble/v2/example"
-	"github.com/ashadi-cc/resemble/v2/request"
+	"github.com/resemble-ai/resemble-go/v2"
+	"github.com/resemble-ai/resemble-go/v2/example"
+	"github.com/resemble-ai/resemble-go/v2/request"
 )
 
 func main() {
