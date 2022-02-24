@@ -24,7 +24,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-    fmt.Println(projects.items)
+    fmt.Println(projects.Items)
 
     project, err := client.Project.Create(request.Payload{
         "name":             "Project 1",
@@ -36,6 +36,7 @@ func main() {
     if err != nil {
         panic(err)
     }
+    fmt.Println(project.Success)
 }
 
 ```
