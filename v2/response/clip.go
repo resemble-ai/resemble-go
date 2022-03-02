@@ -1,6 +1,7 @@
 package response
 
 import (
+	"bytes"
 	"encoding/binary"
 	"log"
 )
@@ -42,60 +43,246 @@ type Clips struct {
 	Items    []ClipItem `json:"items"`
 }
 
-// Metadata represent metadata of wav file
-type Metadata struct {
-	// Riff ID
+// MetaHeader represent Header & Format chunks
+type MetaHeader struct {
+	// RiffID  Riff ID
 	RiffID string
-	// Riff type
+	// RiffType Riff type
 	RiffType string
-	// File Size
+	// FileSize File Size
 	FileSize int
-	// Format chunk id
+	// FormatChunkID Format chunk id
 	FormatChunkID string
-	// Chunk data size
+	// ChunkDataSize Chunk data size
 	ChunkDataSize int
-	// Compression code
+	// CompressionCode Compression code
 	CompressionCode int
-	// number of channel
+	// NumberOfChannels number of channel
 	NumberOfChannels int
-	// Sample rate
+	// SampleRate Sample rate
 	SampleRate int
-	// Byte rate
+	// ByteRate Byte rate
 	ByteRate int
-	// Block align
+	// BlockAlign  Block align
 	BlockAlign int
-	// Bits per sample
+	// BitsPerSample  Bits per sample
 	BitsPerSample int
-	// RawData contains raw metadata
-	RawData []byte
 }
 
-// NewMetaData returns new instance of metadata
-func NewMetaData(data []byte) Metadata {
-	meta := Metadata{
-		RawData: data,
+type Cue struct {
+	// CueChunkID Cue chunk ID
+	CueChunkID string
+	// RemSizeCue Remaining size of the cue chunk after this read
+	RemSizeCue int
+	// NumberCuePoint Number of remaining cue points
+	NumberCuePoint int
+}
+
+type CuePoint struct {
+	// CuePointsID 	Cue point ID
+	CuePointsID uint32
+	// SamplesOffset Sample offset
+	SamplesOffset uint32
+}
+
+type List struct {
+	// ListChunkID 	List chunk ID
+	ListChunkID string
+	// RemSizeofListChunk Remaining size of the list chunk after this read
+	RemSizeofListChunk int
+	// TypeID Type ID
+	TypeID string
+}
+
+type Ltxt struct {
+	// LtxtChunkID 	LTXT chunk ID
+	LtxtChunkID string
+
+	// RemsizeLtxtChunk Remaining size of this ltxt chunk after this read*
+	RemsizeLtxtChunk int
+
+	// LtxtCuePointID  Cue point ID
+	LtxtCuePointID uint32
+
+	// LengthNumSample Length in number of samples
+	LengthNumSample uint32
+
+	// CharType Character type
+	CharType string
+
+	// TextLength
+	TextLength string
+}
+
+// MetaTimestamps
+type MetaTimestamps struct {
+	// Cue Cue
+	Cue Cue
+	// CuePoints Cue points
+	CuePoints []CuePoint
+	// List list chunk
+	List List
+	// Ltxt ltxt chunks
+	Ltxt []Ltxt
+}
+
+type AudioDataChunk struct {
+	// DataChunkID Data chunk ID
+	DataChunkID string
+	// NumberOfRemAudioSamples Number of remaining audio samples * 2
+	NumberOfRemAudioSamples int
+}
+
+// Metadata represent metadata of wav file
+type Metadata struct {
+	// Header represent Header & Format chunks
+	Header MetaHeader
+	// Timestamps (cue, list & ltxt chunks)
+	TimeStamps MetaTimestamps
+
+	// AudioData Audio data chunk
+	AudioData AudioDataChunk
+
+	// RawData contains raw metadata
+	rawData []byte
+
+	foundLtxt bool
+	foundData bool
+	ltxtIndex int
+	dataIndex int
+	isFlush   bool
+}
+
+func NewMetaData() *Metadata {
+	return &Metadata{}
+}
+
+func (meta *Metadata) setFoundLtxt() bool {
+	index := bytes.LastIndex(meta.rawData, []byte("ltxt"))
+	if index > -1 {
+		meta.foundLtxt = true
+		meta.ltxtIndex = index
 	}
-	if len(data) != 44 {
-		log.Println("data lenght must be 44")
-		return meta
+	return meta.foundLtxt
+}
+
+func (meta *Metadata) setFoundData() bool {
+	if !meta.setFoundLtxt() {
+		return false
+	}
+	index := bytes.LastIndex(meta.rawData, []byte("data"))
+	if index > meta.ltxtIndex {
+		meta.foundData = true
+		meta.dataIndex = index
+	}
+	return meta.foundData
+}
+
+// GetRawData returns raw metadata
+func (m Metadata) GetRawData() []byte {
+	return m.rawData
+}
+
+func (meta *Metadata) Flush(data []byte) *Metadata {
+	if meta.isFlush {
+		return nil
 	}
 
-	meta.RiffID = string(data[0:4])
-	meta.FileSize = (bitsToInt(data[4:8]) - 8)
-	meta.RiffType = string(data[8:12])
-	meta.FormatChunkID = string(data[12:16])
-	meta.ChunkDataSize = bitsToInt(data[16:20])
-	meta.CompressionCode = bitsToInt(data[20:22])
-	meta.NumberOfChannels = bitsToInt(data[22:24])
-	meta.SampleRate = bitsToInt(data[24:28])
-	meta.ByteRate = bitsToInt(data[28:32])
-	meta.BlockAlign = bitsToInt(data[32:34])
-	meta.BitsPerSample = bitsToInt(data[34:36])
+	meta.rawData = append(meta.rawData, data...)
+
+	if !meta.setFoundData() {
+		return nil
+	}
+
+	if m := meta.generate(); m != nil {
+		meta.isFlush = true
+		return m
+	}
+
+	return nil
+}
+
+// generate returns new instance of metadata
+func (meta *Metadata) generate() *Metadata {
+	if len(meta.rawData) < (meta.dataIndex + 8) {
+		return nil
+	}
+	data := meta.rawData[0:(meta.dataIndex + 8)]
+	meta.rawData = data
+
+	meta.Header.RiffID = string(data[0:4])
+	meta.Header.FileSize = (bitsToInt(data[4:8]))
+	meta.Header.RiffType = string(data[8:12])
+	meta.Header.FormatChunkID = string(data[12:16])
+	meta.Header.ChunkDataSize = bitsToInt(data[16:20])
+	meta.Header.CompressionCode = bitsToInt(data[20:22])
+	meta.Header.NumberOfChannels = bitsToInt(data[22:24])
+	meta.Header.SampleRate = bitsToInt(data[24:28])
+	meta.Header.ByteRate = bitsToInt(data[28:32])
+	meta.Header.BlockAlign = bitsToInt(data[32:34])
+	meta.Header.BitsPerSample = bitsToInt(data[34:36])
+
+	// Timestamps (cue, list & ltxt chunks)#
+	meta.TimeStamps.Cue.CueChunkID = string(data[36:40])
+	meta.TimeStamps.Cue.RemSizeCue = bitsToInt(data[40:44])
+	meta.TimeStamps.Cue.NumberCuePoint = bitsToInt(data[44:48])
+
+	position := 48
+	for i := 0; i < meta.TimeStamps.Cue.NumberCuePoint; i++ {
+		meta.TimeStamps.CuePoints = append(meta.TimeStamps.CuePoints, CuePoint{
+			CuePointsID:   uint32(bitsToInt64(data[position : position+4])),
+			SamplesOffset: uint32(bitsToInt64(data[position+20 : position+24])),
+		})
+		position = position + 24
+	}
+
+	meta.TimeStamps.List.ListChunkID = string(data[position : position+4])
+	position = position + 4
+	meta.TimeStamps.List.RemSizeofListChunk = bitsToInt(data[position : position+4])
+	position = position + 4
+	meta.TimeStamps.List.TypeID = string(data[position : position+4])
+	position = position + 4
+
+	for {
+		testLtxt := string(data[position : position+4])
+		if testLtxt != "ltxt" {
+			break
+		}
+		ltxt := Ltxt{}
+		ltxt.LtxtChunkID = testLtxt
+		position = position + 4
+		ltxt.RemsizeLtxtChunk = bitsToInt(data[position : position+4])
+		position = position + 4
+		ltxt.LtxtCuePointID = uint32(bitsToInt64(data[position : position+4]))
+		position = position + 4
+		ltxt.LengthNumSample = uint32(bitsToInt64(data[position : position+4]))
+		position = position + 4
+		ltxt.CharType = string(data[position : position+4])
+		position = position + 4 + 8
+		textLength := ltxt.RemsizeLtxtChunk - 20
+		skipLength := textLength
+		if skipLength%2 != 0 {
+			skipLength = skipLength - 1
+			textLength = textLength + 1
+		}
+		b := data[position : position+skipLength]
+		ltxt.TextLength = string(b)
+		meta.TimeStamps.Ltxt = append(meta.TimeStamps.Ltxt, ltxt)
+		position = position + textLength
+	}
+
+	meta.AudioData.DataChunkID = string(data[position : position+4])
+	position = position + 4
+	meta.AudioData.NumberOfRemAudioSamples = bitsToInt(data[position : position+4])
 
 	return meta
 }
 
 func bitsToInt(b []byte) int {
+	return int(bitsToInt64(b))
+}
+
+func bitsToInt64(b []byte) uint64 {
 	var bits uint64
 	switch len(b) {
 	case 2:
@@ -107,5 +294,5 @@ func bitsToInt(b []byte) int {
 	default:
 		log.Println("Can't parse to int ")
 	}
-	return int(bits)
+	return bits
 }

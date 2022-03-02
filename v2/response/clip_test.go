@@ -1,25 +1,60 @@
 package response
 
 import (
+	"bytes"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewMetaData(t *testing.T) {
-	data := []byte{82, 73, 70, 70, 228, 127, 1, 0, 87, 65, 86, 69, 102, 109, 116, 32, 16, 0, 0, 0, 1, 0, 1, 0, 0, 125, 0, 0, 0, 250, 0, 0, 2, 0, 16, 0, 99, 117, 101, 32, 20, 2, 0, 0}
-	meta := NewMetaData(data)
-	assert.Equal(t, data, meta.RawData)
-	assert.Equal(t, "RIFF", meta.RiffID)
-	assert.Greater(t, meta.FileSize, 0)
-	assert.Equal(t, "WAVE", meta.RiffType)
-	assert.Equal(t, "fmt ", meta.FormatChunkID)
-	assert.Equal(t, 16, meta.ChunkDataSize)
-	assert.Equal(t, 1, meta.CompressionCode)
-	assert.Equal(t, 1, meta.NumberOfChannels)
-	assert.True(t, (meta.SampleRate >= 8000 && meta.SampleRate <= 48000))
-	assert.True(t, (meta.ByteRate >= 16000 && meta.ByteRate <= 96000))
+	r := loadTestData()
+	defer r.Close()
 
-	assert.Equal(t, 2, meta.BlockAlign)
-	assert.Equal(t, 16, meta.BitsPerSample)
+	streamingBufferSize := 4 * 1024
+	buf := make([]byte, streamingBufferSize)
+	meta := NewMetaData()
+	rawData := make([]byte, 0)
+	for {
+		n, err := r.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		b := buf[:n]
+		rawData = append(rawData, b...)
+		if m := meta.Flush(b); m != nil {
+			meta = m
+		}
+	}
+
+	index := bytes.LastIndex(rawData, []byte("data"))
+	assert.Equal(t, (index + 8), len(meta.GetRawData()))
+	assert.Equal(t, "RIFF", meta.Header.RiffID)
+	assert.Greater(t, meta.Header.FileSize, 0)
+	assert.Equal(t, "WAVE", meta.Header.RiffType)
+	assert.Equal(t, "fmt ", meta.Header.FormatChunkID)
+	assert.Equal(t, 16, meta.Header.ChunkDataSize)
+	assert.Equal(t, 1, meta.Header.CompressionCode)
+	assert.Equal(t, 1, meta.Header.NumberOfChannels)
+	assert.True(t, (meta.Header.SampleRate >= 8000 && meta.Header.SampleRate <= 48000))
+	assert.True(t, (meta.Header.ByteRate >= 16000 && meta.Header.ByteRate <= 96000))
+
+	assert.Equal(t, 2, meta.Header.BlockAlign)
+	assert.Equal(t, 16, meta.Header.BitsPerSample)
+
+	assert.Equal(t, "cue ", meta.TimeStamps.Cue.CueChunkID)
+	assert.Equal(t, 4+(meta.TimeStamps.Cue.NumberCuePoint*24), meta.TimeStamps.Cue.RemSizeCue)
+	assert.Greater(t, meta.TimeStamps.Cue.NumberCuePoint, 1)
+
+	assert.Equal(t, "list", meta.TimeStamps.List.ListChunkID)
+	assert.Greater(t, meta.TimeStamps.List.RemSizeofListChunk, 1)
+	assert.Equal(t, "adtl", meta.TimeStamps.List.TypeID)
+
+	for _, ltxt := range meta.TimeStamps.Ltxt {
+		assert.Equal(t, "ltxt", ltxt.LtxtChunkID)
+		assert.True(t, ltxt.CharType == "grph" || ltxt.CharType == "phon")
+	}
+
+	assert.Equal(t, "data", meta.AudioData.DataChunkID)
 }
