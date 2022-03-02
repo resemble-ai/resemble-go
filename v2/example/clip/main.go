@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -9,6 +10,10 @@ import (
 	"github.com/resemble-ai/resemble-go/v2/example"
 	"github.com/resemble-ai/resemble-go/v2/request"
 )
+
+type WavFile struct {
+	Data []byte `json:"data"`
+}
 
 func main() {
 	client := resemble.NewClient(example.LoadConfigByKey("TEST_API_KEY"))
@@ -88,21 +93,11 @@ func main() {
 			log.Fatal(err)
 		// receive metadata
 		case meta := <-cMeta:
-			fmt.Println(meta.RiffID)
-			fmt.Println(meta.FileSize)
-			fmt.Println(meta.RiffType)
-			fmt.Println(meta.FormatChunkID)
-			fmt.Println(meta.ChunkDataSize)
-			fmt.Println(meta.CompressionCode)
-			fmt.Println(meta.NumberOfChannels)
-			fmt.Println(meta.SampleRate)
-			fmt.Println(meta.ByteRate)
-			fmt.Println(meta.BlockAlign)
-			fmt.Println(meta.BitsPerSample)
+			b, _ := json.Marshal(meta)
+			fmt.Println(string(b))
 		// receive chunk
 		case chunk := <-cChunk:
-			_ = chunk
-			fmt.Println("chunk")
+			fmt.Println("chunk size", len(chunk))
 		// receive done signal. exit
 		case <-cDone:
 			return

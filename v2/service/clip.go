@@ -195,7 +195,7 @@ func (c clip) Stream(data request.Payload, options ...option.ClipStream) (chan r
 }
 
 func (c clip) decodeChunk(reader *bufio.Reader, decoder *util.StreamDecoder, cChunk chan []byte, cMeta chan response.Metadata, cDone chan bool, cErr chan error) {
-	isreadHeader := false
+	meta := response.NewMetaData()
 	for {
 		chunk, err := reader.ReadBytes('\n')
 		if err != nil {
@@ -205,13 +205,11 @@ func (c clip) decodeChunk(reader *bufio.Reader, decoder *util.StreamDecoder, cCh
 			break
 		}
 
-		decoder.DecodeChunk(chunk)
-		if !isreadHeader {
-			if header := decoder.Header(); header != nil {
-				isreadHeader = true
-				cMeta <- response.NewMetaData(header)
-			}
+		if m := meta.Flush(chunk); m != nil {
+			cMeta <- *m
 		}
+
+		decoder.DecodeChunk(chunk)
 
 		if buffer := decoder.FlushBuffer(false); buffer != nil {
 			cChunk <- buffer
