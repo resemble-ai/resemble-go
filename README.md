@@ -62,20 +62,12 @@ for {
         log.Fatal(err)
     // receive metadata
     case meta := <-cMeta:
-        fmt.Println(meta.RiffID)
-        fmt.Println(meta.FileSize)
-        fmt.Println(meta.RiffType)
-        fmt.Println(meta.FormatChunkID)
-        fmt.Println(meta.ChunkDataSize)
-        fmt.Println(meta.CompressionCode)
-        fmt.Println(meta.NumberOfChannels)
-        fmt.Println(meta.SampleRate)
-        fmt.Println(meta.ByteRate)
-        fmt.Println(meta.BlockAlign)
-        fmt.Println(meta.BitsPerSample)
+        b, _ := json.Marshal(meta)
+        //print as json object
+        fmt.Println(string(b))
     // receive chunk
     case chunk := <-cChunk:
-        fmt.Println("chunk data")
+        fmt.Println("chunk data", len(chunk))
     // receive done signal. exit
     case <-cDone:
         return
