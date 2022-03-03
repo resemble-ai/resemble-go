@@ -242,14 +242,13 @@ func (meta *Metadata) generate() *Metadata {
 	position = position + 4
 	meta.TimeStamps.List.TypeID = string(data[position : position+4])
 	position = position + 4
-
+	endLtxtPosition := (meta.TimeStamps.List.RemSizeofListChunk + position) - 4
 	for {
-		testLtxt := string(data[position : position+4])
-		if testLtxt != "ltxt" {
+		if position >= endLtxtPosition {
 			break
 		}
 		ltxt := Ltxt{}
-		ltxt.LtxtChunkID = testLtxt
+		ltxt.LtxtChunkID = string(data[position : position+4])
 		position = position + 4
 		ltxt.RemsizeLtxtChunk = bitsToInt(data[position : position+4])
 		position = position + 4
@@ -262,7 +261,6 @@ func (meta *Metadata) generate() *Metadata {
 		textLength := ltxt.RemsizeLtxtChunk - 20
 		skipLength := textLength
 		if skipLength%2 != 0 {
-			// skipLength = skipLength - 1
 			textLength = textLength + 1
 		}
 		b := data[position : position+skipLength]
