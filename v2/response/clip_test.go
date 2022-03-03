@@ -12,7 +12,7 @@ func TestNewMetaData(t *testing.T) {
 	r := loadTestData()
 	defer r.Close()
 
-	streamingBufferSize := 4 * 1024
+	streamingBufferSize := 2
 	buf := make([]byte, streamingBufferSize)
 	meta := NewMetaData()
 	rawData := make([]byte, 0)
