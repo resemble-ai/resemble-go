@@ -238,10 +238,7 @@ func (meta *Metadata) generate(endMetaPosition int) *Metadata {
 	meta.TimeStamps.List.TypeID = string(data[position : position+4])
 	position = position + 4
 	endLtxtPosition := (meta.TimeStamps.List.RemSizeofListChunk + position) - 4
-	for {
-		if position >= endLtxtPosition {
-			break
-		}
+	for position < endLtxtPosition {
 		ltxt := Ltxt{}
 		ltxt.LtxtChunkID = string(data[position : position+4])
 		position = position + 4
