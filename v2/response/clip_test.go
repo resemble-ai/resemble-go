@@ -57,4 +57,5 @@ func TestNewMetaData(t *testing.T) {
 	}
 
 	assert.Equal(t, "data", meta.AudioData.DataChunkID)
+	assert.Greater(t, meta.AudioData.NumberOfRemAudioSamples, 1)
 }
