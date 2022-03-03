@@ -79,10 +79,10 @@ type Cue struct {
 }
 
 type CuePoint struct {
-	// CuePointsID 	Cue point ID
-	CuePointsID uint32
-	// SamplesOffset Sample offset
-	SamplesOffset uint32
+	// CuePointID 	Cue point ID
+	CuePointID uint32
+	// SampleOffset Sample offset
+	SampleOffset uint32
 }
 
 type List struct {
@@ -230,8 +230,8 @@ func (meta *Metadata) generate() *Metadata {
 	position := 48
 	for i := 0; i < meta.TimeStamps.Cue.NumberCuePoint; i++ {
 		meta.TimeStamps.CuePoints = append(meta.TimeStamps.CuePoints, CuePoint{
-			CuePointsID:   uint32(bitsToInt64(data[position : position+4])),
-			SamplesOffset: uint32(bitsToInt64(data[position+20 : position+24])),
+			CuePointID:   uint32(bitsToInt64(data[position : position+4])),
+			SampleOffset: uint32(bitsToInt64(data[position+20 : position+24])),
 		})
 		position = position + 24
 	}
