@@ -1,7 +1,6 @@
 package response
 
 import (
-	"bytes"
 	"encoding/binary"
 	"log"
 )
@@ -146,36 +145,11 @@ type Metadata struct {
 	// RawData contains raw metadata
 	rawData []byte
 
-	foundLtxt bool
-	foundData bool
-	ltxtIndex int
-	dataIndex int
-	isFlush   bool
+	isFlush bool
 }
 
 func NewMetaData() *Metadata {
 	return &Metadata{}
-}
-
-func (meta *Metadata) setFoundLtxt() bool {
-	index := bytes.LastIndex(meta.rawData, []byte("ltxt"))
-	if index > -1 {
-		meta.foundLtxt = true
-		meta.ltxtIndex = index
-	}
-	return meta.foundLtxt
-}
-
-func (meta *Metadata) setFoundData() bool {
-	if !meta.setFoundLtxt() {
-		return false
-	}
-	index := bytes.LastIndex(meta.rawData, []byte("data"))
-	if index > meta.ltxtIndex {
-		meta.foundData = true
-		meta.dataIndex = index
-	}
-	return meta.foundData
 }
 
 // GetRawData returns raw metadata
@@ -190,11 +164,12 @@ func (meta *Metadata) Flush(data []byte) *Metadata {
 
 	meta.rawData = append(meta.rawData, data...)
 
-	if !meta.setFoundData() {
+	endMetaPosition, ok := meta.checkBytes()
+	if !ok {
 		return nil
 	}
 
-	if m := meta.generate(); m != nil {
+	if m := meta.generate(endMetaPosition); m != nil {
 		meta.isFlush = true
 		return m
 	}
@@ -202,12 +177,32 @@ func (meta *Metadata) Flush(data []byte) *Metadata {
 	return nil
 }
 
+func (meta *Metadata) checkBytes() (int, bool) {
+	data := meta.rawData
+	if len(data) < 44 {
+		return -1, false
+	}
+
+	cuePointsPosition := bitsToInt(data[40:44]) + 44
+	if len(data) < cuePointsPosition+8 {
+		return -1, false
+	}
+
+	endLtxtCalc := cuePointsPosition + 8 + bitsToInt(data[cuePointsPosition+4:cuePointsPosition+8])
+	endMetaPosition := endLtxtCalc + 8
+	if len(data) < endMetaPosition {
+		return -1, false
+	}
+
+	return endMetaPosition, true
+}
+
 // generate returns new instance of metadata
-func (meta *Metadata) generate() *Metadata {
-	if len(meta.rawData) < (meta.dataIndex + 8) {
+func (meta *Metadata) generate(endMetaPosition int) *Metadata {
+	if len(meta.rawData) < endMetaPosition {
 		return nil
 	}
-	data := meta.rawData[0:(meta.dataIndex + 8)]
+	data := meta.rawData[0:endMetaPosition]
 	meta.rawData = data
 
 	meta.Header.RiffID = string(data[0:4])
