@@ -262,7 +262,7 @@ func (meta *Metadata) generate() *Metadata {
 		textLength := ltxt.RemsizeLtxtChunk - 20
 		skipLength := textLength
 		if skipLength%2 != 0 {
-			skipLength = skipLength - 1
+			// skipLength = skipLength - 1
 			textLength = textLength + 1
 		}
 		b := data[position : position+skipLength]
