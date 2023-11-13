@@ -1,3 +1,5 @@
+**⚠️ IMPORTANT: This SDK is now considered deprecated and will no longer receive further support or maintenance for the API. Please refer to the RESEMBLE API Documentation for a list of supported languages.**
+
 # resemble.ai API
 
 [resemble.ai](https://resemble.ai) is a state-of-the-art natural voice cloning and synthesis provider. Best of all, the platform is accessible by using our public API! Sign up [here](https://app.resemble.ai) to get an API token!
